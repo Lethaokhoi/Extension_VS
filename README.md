@@ -46,8 +46,29 @@ brute.cpp ──►  tests/N.out
 
 | Lệnh | Mô tả |
 |------|--------|
+| **HSG: Cấu hình API key (AI)** | Lưu key OpenAI / API tương thích (một lần) |
+| **HSG: AI tạo gen.cpp + brute.cpp từ đề bài** | Đọc đề → AI viết gen + code trâu |
 | **HSG: Khởi tạo gen.cpp + brute.cpp + tests** | Tạo file mẫu + thư mục `tests/` |
 | **HSG: Sinh test (gen → .in, brute → .out)** | Sinh N cặp test (nối tiếp số thứ tự) |
+
+## AI — tạo gen + brute từ đề
+
+1. **Cấu hình API key** (Settings hoặc lệnh trên) — key lưu an toàn trên máy bạn.
+2. Để đề trong một trong các file: `de.txt`, `de.md`, `problem.md` — hoặc mở file đó / bôi đen đoạn đề.
+3. Chạy **HSG: AI tạo gen.cpp + brute.cpp từ đề bài**.
+4. Kiểm tra code → **HSG: Sinh test**.
+
+Cấu hình thêm (`hsg.ai.*`):
+
+| Key | Mặc định |
+|-----|----------|
+| `hsg.ai.endpoint` | OpenAI Chat Completions |
+| `hsg.ai.model` | `gpt-4o-mini` |
+| `hsg.ai.includeMainCode` | `true` — gửi kèm `main.cpp` nếu có |
+
+Dùng **OpenRouter / Groq**: đổi `hsg.ai.endpoint` + `hsg.ai.model` theo tài liệu nhà cung cấp.
+
+**Lưu ý:** Cần API key riêng (trả phí theo nhà cung cấp). Extension không gửi đề lên server của tác giả extension — chỉ gọi API bạn cấu hình.
 
 ## Cấu hình (`hsg.*`)
 
