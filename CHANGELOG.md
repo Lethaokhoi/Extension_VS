@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- Mở rộng HUONG_DAN.md: giải thích lệnh extension, gen/brute, mt19937, stdin/stdout
+
 ## 0.4.1
 
 - Sửa lỗi g++ trên Windows khi đường dẫn có dấu / khoảng trắng (vd `Máy tính`)
