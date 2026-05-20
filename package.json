@@ -3,18 +3,18 @@
   "displayName": "HSG Sinh test",
   "description": "Sinh file .in / .out cho luyện thi HSG: gen.cpp tạo input, brute.cpp (code trâu) tạo đáp án đúng.",
   "version": "0.2.0",
-  "publisher": "lethaokhoi",
+  "publisher": "Lethaokhoi",
   "author": {
     "name": "Khôi Chu Tuấn"
   },
   "license": "MIT",
-  "homepage": "https://github.com/lethaokhoi/hsg-test-gen#readme",
+  "homepage": "https://github.com/Lethaokhoi/Extension_VS#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lethaokhoi/hsg-test-gen.git"
+    "url": "https://github.com/Lethaokhoi/Extension_VS.git"
   },
   "bugs": {
-    "url": "https://github.com/lethaokhoi/hsg-test-gen/issues"
+    "url": "https://github.com/Lethaokhoi/Extension_VS/issues"
   },
   "galleryBannerColor": "#1a3a52",
   "categories": [
