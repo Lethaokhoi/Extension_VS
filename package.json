@@ -1,0 +1,127 @@
+{
+  "name": "hsg-test-gen",
+  "displayName": "HSG Sinh test",
+  "description": "Sinh file .in / .out cho luyện thi HSG: gen.cpp tạo input, brute.cpp (code trâu) tạo đáp án đúng.",
+  "version": "0.2.0",
+  "publisher": "lethaokhoi",
+  "author": {
+    "name": "Khôi Chu Tuấn"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/lethaokhoi/hsg-test-gen#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lethaokhoi/hsg-test-gen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lethaokhoi/hsg-test-gen/issues"
+  },
+  "galleryBannerColor": "#1a3a52",
+  "categories": [
+    "Education",
+    "Other"
+  ],
+  "keywords": [
+    "hsg",
+    "olympic",
+    "competitive programming",
+    "test generator",
+    "brute force",
+    "cpp",
+    "vietnam",
+    "sinh test",
+    "lập trình"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "hsg.initWorkspace",
+        "title": "HSG: Khởi tạo gen.cpp + brute.cpp + tests"
+      },
+      {
+        "command": "hsg.generateTests",
+        "title": "HSG: Sinh test (gen → .in, brute → .out)"
+      }
+    ],
+    "configuration": {
+      "title": "HSG Sinh test",
+      "properties": {
+        "hsg.cppCompiler": {
+          "type": "string",
+          "default": "g++",
+          "description": "Trình biên dịch C++"
+        },
+        "hsg.cppFlags": {
+          "type": "string",
+          "default": "-O2 -std=c++17",
+          "description": "Cờ biên dịch gen.cpp"
+        },
+        "hsg.bruteCppFlags": {
+          "type": "string",
+          "default": "-O2 -std=c++17",
+          "description": "Cờ biên dịch brute.cpp (code trâu)"
+        },
+        "hsg.python": {
+          "type": "string",
+          "default": "python",
+          "description": "Lệnh Python (nếu dùng .py)"
+        },
+        "hsg.testFolder": {
+          "type": "string",
+          "default": "tests",
+          "description": "Thư mục lưu .in / .out"
+        },
+        "hsg.generatorFile": {
+          "type": "string",
+          "default": "gen.cpp",
+          "description": "Chương trình sinh input (in ra stdout)"
+        },
+        "hsg.bruteFile": {
+          "type": "string",
+          "default": "brute.cpp",
+          "description": "Code trâu — đọc input stdin, in đáp án đúng ra stdout"
+        },
+        "hsg.defaultTestCount": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Số test mặc định mỗi lần sinh"
+        },
+        "hsg.genTimeLimitMs": {
+          "type": "number",
+          "default": 3000,
+          "minimum": 100,
+          "description": "Giới hạn thời gian chạy gen (ms)"
+        },
+        "hsg.bruteTimeLimitMs": {
+          "type": "number",
+          "default": 60000,
+          "minimum": 1000,
+          "description": "Giới hạn thời gian chạy brute (ms) — code trâu thường chậm"
+        },
+        "hsg.language": {
+          "type": "string",
+          "enum": ["cpp", "python"],
+          "default": "cpp",
+          "description": "Ngôn ngữ gen và brute"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.3"
+  }
+}
