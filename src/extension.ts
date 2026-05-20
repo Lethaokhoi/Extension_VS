@@ -2,7 +2,6 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as vscode from "vscode";
 import { getWorkspaceRoot, loadConfig, testDir } from "./config";
-import { configureApiKey, generateCodeFromProblem } from "./aiCommands";
 import {
   nextTestIndex,
   prepareProgram,
@@ -223,16 +222,23 @@ async function generateTests(): Promise<void> {
   );
 }
 
+async function openGuide(context: vscode.ExtensionContext): Promise<void> {
+  const guidePath = path.join(context.extensionPath, "HUONG_DAN.md");
+  try {
+    const doc = await vscode.workspace.openTextDocument(guidePath);
+    await vscode.window.showTextDocument(doc, { preview: false });
+  } catch {
+    vscode.window.showErrorMessage(
+      "HSG: Không tìm thấy HUONG_DAN.md trong extension."
+    );
+  }
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("hsg.initWorkspace", initWorkspace),
     vscode.commands.registerCommand("hsg.generateTests", generateTests),
-    vscode.commands.registerCommand("hsg.configureApiKey", () =>
-      configureApiKey(context)
-    ),
-    vscode.commands.registerCommand("hsg.generateCodeAi", () =>
-      generateCodeFromProblem(context)
-    )
+    vscode.commands.registerCommand("hsg.openGuide", () => openGuide(context))
   );
 }
 

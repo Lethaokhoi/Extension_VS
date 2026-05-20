@@ -1,7 +1,7 @@
 {
   "name": "hsg-test-gen",
   "displayName": "HSG Sinh test",
-  "description": "Sinh test HSG: AI tạo gen + brute từ đề, rồi sinh file .in / .out chuẩn.",
+  "description": "Sinh file .in / .out cho luyện HSG: gen.cpp tạo input, brute.cpp (code trâu) tạo đáp án. Có hướng dẫn từng bước.",
   "version": "0.3.0",
   "publisher": "Lethaokhoi",
   "author": {
@@ -48,12 +48,8 @@
         "title": "HSG: Sinh test (gen → .in, brute → .out)"
       },
       {
-        "command": "hsg.configureApiKey",
-        "title": "HSG: Cấu hình API key (AI)"
-      },
-      {
-        "command": "hsg.generateCodeAi",
-        "title": "HSG: AI tạo gen.cpp + brute.cpp từ đề bài"
+        "command": "hsg.openGuide",
+        "title": "HSG: Mở hướng dẫn sinh test"
       }
     ],
     "configuration": {
@@ -118,33 +114,6 @@
           "enum": ["cpp", "python"],
           "default": "cpp",
           "description": "Ngôn ngữ gen và brute"
-        },
-        "hsg.ai.endpoint": {
-          "type": "string",
-          "default": "https://api.openai.com/v1/chat/completions",
-          "description": "URL API (OpenAI hoặc tương thích: OpenRouter, Groq, …)"
-        },
-        "hsg.ai.model": {
-          "type": "string",
-          "default": "gpt-4o-mini",
-          "description": "Tên model (vd gpt-4o-mini, gpt-4o)"
-        },
-        "hsg.ai.maxTokens": {
-          "type": "number",
-          "default": 8000,
-          "minimum": 500,
-          "maximum": 128000,
-          "description": "Giới hạn token phản hồi AI"
-        },
-        "hsg.ai.problemFile": {
-          "type": "string",
-          "default": "",
-          "description": "File đề ưu tiên (vd de.txt). Để trống = tự tìm de.txt, problem.md…"
-        },
-        "hsg.ai.includeMainCode": {
-          "type": "boolean",
-          "default": true,
-          "description": "Gửi kèm main.cpp cho AI tham khảo khi sinh brute"
         }
       }
     }
