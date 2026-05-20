@@ -18,9 +18,10 @@ async function runProcess(
 ): Promise<RunResult> {
   const start = Date.now();
   return new Promise((resolve) => {
+    // shell: false — tránh đường dẫn có dấu/khoảng trắng (vd "Máy tính") bị tách khi gọi g++
     const child = spawn(command, args, {
       cwd: options.cwd,
-      shell: process.platform === "win32",
+      shell: false,
       windowsHide: true,
     });
 

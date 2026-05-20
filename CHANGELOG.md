@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- Sửa lỗi g++ trên Windows khi đường dẫn có dấu / khoảng trắng (vd `Máy tính`)
+
 ## 0.4.0
 
 - Hướng dẫn từng bước (HUONG_DAN.md), lệnh mở hướng dẫn

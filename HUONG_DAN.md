@@ -183,6 +183,7 @@ Nếu brute sai → sửa `brute.cpp` → xóa file `.out` cũ → **Sinh test**
 | brute quá thời gian | Input quá lớn | Giảm random trong gen; Settings: `hsg.bruteTimeLimitMs` |
 | `.out` sai | Brute sai logic | Sửa `brute.cpp`, sinh test lại |
 | Không thấy lệnh HSG | Extension chưa cài / chưa reload | Cài extension, Reload Window |
+| `g++: error: ... My: No such file` / đường dẫn bị cắt | Folder có **dấu** hoặc **khoảng trắng** (`Máy tính`) + bản extension cũ | Cập nhật extension **0.4.1+**, hoặc chuyển bài sang `C:\HSG\Bai_1` |
 
 ---
 
