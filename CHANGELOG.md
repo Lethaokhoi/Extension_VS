@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+
+- Hướng dẫn từng bước (HUONG_DAN.md), lệnh mở hướng dẫn
+- Bỏ tính năng AI — chỉ sinh test bằng gen + brute
+
 ## 0.3.0
 
 - Thêm **HUONG_DAN.md** — hướng dẫn từng bước sinh test (tiếng Việt)
