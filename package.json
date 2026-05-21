@@ -2,7 +2,7 @@
   "name": "hsg-test-gen",
   "displayName": "HSG Sinh test",
   "description": "Sinh file .in / .out cho luyện HSG: gen.cpp tạo input, brute.cpp (code trâu) tạo đáp án. Có hướng dẫn từng bước.",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "publisher": "Lethaokhoi",
   "author": {
     "name": "Khôi Chu Tuấn"
@@ -35,7 +35,12 @@
   "engines": {
     "vscode": "^1.85.0"
   },
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:hsg.initWorkspace",
+    "onCommand:hsg.generateTests",
+    "onCommand:hsg.openGuide"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [

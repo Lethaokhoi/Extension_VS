@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.3
+
+- Sửa lỗi không thấy lệnh HSG: `activationEvents` rỗng khiến extension không kích hoạt
+
 ## 0.4.2
 
 - Mở rộng HUONG_DAN.md: giải thích lệnh extension, gen/brute, mt19937, stdin/stdout
