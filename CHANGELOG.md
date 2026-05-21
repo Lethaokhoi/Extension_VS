@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.4
+
+- Bỏ `activationEvents` thừa — VS Code tự kích hoạt từ `contributes.commands`
+
 ## 0.4.3
 
 - Sửa lỗi không thấy lệnh HSG: `activationEvents` rỗng khiến extension không kích hoạt
