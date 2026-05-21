@@ -12,6 +12,8 @@ export interface HsgConfig {
   testFolder: string;
   generatorFile: string;
   bruteFile: string;
+  solutionFile: string;
+  runTimeLimitMs: number;
   defaultTestCount: number;
   genTimeLimitMs: number;
   bruteTimeLimitMs: number;
@@ -41,6 +43,8 @@ export function loadConfig(): HsgConfig | undefined {
     testFolder: cfg.get<string>("testFolder", "tests"),
     generatorFile: cfg.get<string>("generatorFile", "gen.cpp"),
     bruteFile: cfg.get<string>("bruteFile", "brute.cpp"),
+    solutionFile: cfg.get<string>("solutionFile", "main.cpp"),
+    runTimeLimitMs: cfg.get<number>("runTimeLimitMs", 2000),
     defaultTestCount: cfg.get<number>("defaultTestCount", 10),
     genTimeLimitMs: cfg.get<number>("genTimeLimitMs", 3000),
     bruteTimeLimitMs: cfg.get<number>("bruteTimeLimitMs", 60000),

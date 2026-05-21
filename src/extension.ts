@@ -1,13 +1,14 @@
 import * as fs from "fs/promises";
 import * as path from "path";
 import * as vscode from "vscode";
-import { getWorkspaceRoot, loadConfig, testDir } from "./config";
+import { getWorkspaceRoot, loadConfig } from "./config";
 import {
-  nextTestIndex,
-  prepareProgram,
-  runProgram,
-  writeTestPair,
-} from "./runner";
+  generateAllTests,
+  loadTestGenConfig,
+  saveDefaultTestGenConfig,
+} from "./generator";
+import { runSolutionOnAllTests } from "./testRunner";
+import { closeDashboard, postProgress, postResults, showDashboard } from "./webviewPanel";
 
 function requireConfig(): ReturnType<typeof loadConfig> {
   const cfg = loadConfig();
@@ -22,12 +23,12 @@ function requireConfig(): ReturnType<typeof loadConfig> {
 
 async function askCount(defaultValue: number): Promise<number | undefined> {
   const raw = await vscode.window.showInputBox({
-    prompt: "Số cặp test (.in + .out) cần sinh",
+    prompt: "Số test random từ gen.cpp (edge case lấy từ hsg-tests.json)",
     value: String(defaultValue),
     validateInput: (v) => {
       const n = Number(v);
-      if (!Number.isInteger(n) || n < 1) {
-        return "Nhập số nguyên dương";
+      if (!Number.isInteger(n) || n < 0) {
+        return "Nhập số nguyên ≥ 0";
       }
       return null;
     },
@@ -39,7 +40,6 @@ async function askCount(defaultValue: number): Promise<number | undefined> {
 }
 
 const SAMPLE_GEN = `// Sinh MỘT bộ input — in ra stdout (không in đáp án).
-// Extension gọi chương trình này nhiều lần; mỗi lần một input khác nhau.
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -57,8 +57,7 @@ int main() {
 }
 `;
 
-const SAMPLE_BRUTE = `// Code trâu — đọc stdin (bộ input từ gen), in đáp án ĐÚNG ra stdout.
-// File .out sinh bởi extension = output của chương trình này.
+const SAMPLE_BRUTE = `// Code trâu — đọc stdin, in đáp án ĐÚNG ra stdout.
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -68,10 +67,7 @@ int main() {
   long long s = 0, x;
   int n;
   if (!(cin >> n)) return 0;
-  while (n--) {
-    cin >> x;
-    s += x;
-  }
+  while (n--) { cin >> x; s += x; }
   cout << s << "\\n";
   return 0;
 }
@@ -97,6 +93,7 @@ async function initWorkspace(): Promise<void> {
   }
 
   await fs.mkdir(path.join(root, "tests"), { recursive: true });
+  await saveDefaultTestGenConfig(root);
 
   const settings = path.join(root, ".vscode", "settings.json");
   try {
@@ -109,8 +106,10 @@ async function initWorkspace(): Promise<void> {
         {
           "hsg.generatorFile": "gen.cpp",
           "hsg.bruteFile": "brute.cpp",
+          "hsg.solutionFile": "main.cpp",
           "hsg.testFolder": "tests",
           "hsg.bruteTimeLimitMs": 60000,
+          "hsg.runTimeLimitMs": 2000,
         },
         null,
         2
@@ -120,7 +119,7 @@ async function initWorkspace(): Promise<void> {
   }
 
   vscode.window.showInformationMessage(
-    "HSG: Đã tạo gen.cpp (sinh input), brute.cpp (code trâu → đáp án) và tests/."
+    "HSG: Đã tạo gen, brute, tests/, hsg-tests.json (edge cases)."
   );
 }
 
@@ -128,96 +127,69 @@ async function generateTests(): Promise<void> {
   const cfg = requireConfig();
   if (!cfg) return;
 
-  const count = await askCount(cfg.defaultTestCount);
+  const genCfg = await loadTestGenConfig(cfg.workspaceRoot);
+  const defaultCount = genCfg.randomCount ?? cfg.defaultTestCount;
+  const count = await askCount(defaultCount);
   if (count === undefined) return;
 
   await vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: `HSG: Sinh ${count} test (brute → .out)`,
+      title: `HSG: Sinh test (gen + edge cases)`,
       cancellable: true,
     },
-    async (progress, token) => {
-      const gen = await prepareProgram(
-        cfg,
-        cfg.generatorFile,
-        "gen",
-        cfg.cppFlags
-      );
-      if (!gen.ok) {
-        vscode.window.showErrorMessage(`HSG gen: ${gen.message}`);
+    async (_progress, token) => {
+      const result = await generateAllTests(cfg, count, {
+        report: (msg) => _progress.report({ message: msg }),
+        isCancelled: () => token.isCancellationRequested,
+      });
+
+      if (result.failed) {
+        vscode.window.showErrorMessage(`HSG: ${result.failed}`);
         return;
       }
-
-      const brute = await prepareProgram(
-        cfg,
-        cfg.bruteFile,
-        "brute",
-        cfg.bruteCppFlags
-      );
-      if (!brute.ok) {
-        vscode.window.showErrorMessage(`HSG brute: ${brute.message}`);
-        return;
-      }
-
-      const dir = testDir(cfg);
-      let startIdx = await nextTestIndex(dir);
-      let ok = 0;
-
-      for (let i = 0; i < count; i++) {
-        if (token.isCancellationRequested) break;
-
-        const idx = startIdx + i;
-        progress.report({ message: `Test ${idx} — gen…` });
-
-        const genRun = await runProgram(
-          gen.runPath,
-          gen.runArgs,
-          undefined,
-          cfg.genTimeLimitMs,
-          cfg.workspaceRoot
-        );
-
-        if (genRun.timedOut || genRun.exitCode !== 0) {
-          vscode.window.showErrorMessage(
-            `HSG: gen lỗi (test ${idx}): ${genRun.stderr || "timeout"}`
-          );
-          break;
-        }
-
-        const input = genRun.stdout;
-        progress.report({ message: `Test ${idx} — brute (code trâu)…` });
-
-        const bruteRun = await runProgram(
-          brute.runPath,
-          brute.runArgs,
-          input,
-          cfg.bruteTimeLimitMs,
-          cfg.workspaceRoot
-        );
-
-        if (bruteRun.timedOut) {
-          vscode.window.showErrorMessage(
-            `HSG: brute quá thời gian ở test ${idx}. Tăng hsg.bruteTimeLimitMs hoặc giảm input trong gen.`
-          );
-          break;
-        }
-        if (bruteRun.exitCode !== 0) {
-          vscode.window.showErrorMessage(
-            `HSG: brute lỗi ở test ${idx}:\n${bruteRun.stderr || "runtime error"}`
-          );
-          break;
-        }
-
-        await writeTestPair(dir, idx, input, bruteRun.stdout);
-        ok++;
-      }
-
-      if (ok > 0) {
+      if (result.ok > 0) {
         vscode.window.showInformationMessage(
-          `HSG: Đã sinh ${ok} cặp test trong ${cfg.testFolder}/ (.in từ gen, .out từ brute).`
+          `HSG: Đã sinh ${result.ok} cặp test trong ${cfg.testFolder}/ (random + edge).`
         );
       }
+    }
+  );
+}
+
+async function runTestsDashboard(context: vscode.ExtensionContext): Promise<void> {
+  const cfg = requireConfig();
+  if (!cfg) return;
+
+  showDashboard(context);
+
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "HSG: Chạy test trên main.cpp",
+      cancellable: false,
+    },
+    async () => {
+      const { results, compileError } = await runSolutionOnAllTests(
+        cfg,
+        cfg.solutionFile,
+        cfg.runTimeLimitMs,
+        (cur, total, name) => postProgress(cur, total, name)
+      );
+
+      if (compileError) {
+        vscode.window.showErrorMessage(`HSG: ${compileError}`);
+        closeDashboard();
+        return;
+      }
+
+      if (!results.length) {
+        vscode.window.showWarningMessage(
+          `HSG: Không có file .in trong ${cfg.testFolder}/. Hãy Sinh test trước.`
+        );
+      }
+
+      postResults(results);
     }
   );
 }
@@ -238,8 +210,13 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand("hsg.initWorkspace", initWorkspace),
     vscode.commands.registerCommand("hsg.generateTests", generateTests),
+    vscode.commands.registerCommand("hsg.runTestsDashboard", () =>
+      runTestsDashboard(context)
+    ),
     vscode.commands.registerCommand("hsg.openGuide", () => openGuide(context))
   );
 }
 
-export function deactivate(): void {}
+export function deactivate(): void {
+  closeDashboard();
+}

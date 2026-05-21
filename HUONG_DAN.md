@@ -41,7 +41,8 @@ Mở Command Palette: **`Ctrl + Shift + P`** → gõ **`HSG`**.
 |------|----------|----------------|
 | **HSG: Mở hướng dẫn sinh test** | Mở file này (`HUONG_DAN.md`) | Lần đầu, hoặc quên bước |
 | **HSG: Khởi tạo gen.cpp + brute.cpp + tests** | Tạo `gen.cpp`, `brute.cpp`, folder `tests/` (file **mẫu** nếu chưa có) | Mỗi bài mới, folder trống |
-| **HSG: Sinh test (gen → .in, brute → .out)** | Biên dịch `gen` + `brute`, chạy `gen` N lần, mỗi lần chạy `brute` → lưu `.in` / `.out` | Đã sửa xong `gen` và `brute` |
+| **HSG: Sinh test (gen → .in, brute → .out)** | Random từ `gen` + edge cases từ `hsg-tests.json` | Đã sửa xong `gen` và `brute` |
+| **HSG: Chạy test & Dashboard** | Chấm `main.cpp` trên mọi `.in`, bảng AC/WA + diff | Đã có test + `main.cpp` |
 
 ### Lệnh «Sinh test» làm từng bước
 
@@ -216,9 +217,29 @@ Khi chấm tay: `brute.exe < 1.in` nghĩa là lấy file `1.in` làm stdin.
 
 ---
 
+## Edge cases tự động (`hsg-tests.json`)
+
+Sau **Khởi tạo**, folder bài có file **`hsg-tests.json`** — danh sách input cố định (biên, 0, số lớn…).
+
+```json
+{
+  "randomCount": 10,
+  "edgeCases": [
+    { "name": "n=1", "input": "1\n42\n" },
+    { "name": "n=0-empty", "input": "0\n" },
+    { "name": "negative", "input": "3\n-1 0 1000000000\n" }
+  ]
+}
+```
+
+Khi **Sinh test**: extension chạy `gen` đủ số lần random, rồi **tự thêm** từng edge case → chạy `brute` → lưu `.in` / `.out`.  
+Sửa `input` cho **khớp format đề** của bạn.
+
+---
+
 ## Bước 5 — Sinh test
 
-`Ctrl+Shift+P` → **HSG: Sinh test (gen → .in, brute → .out)** → nhập số test (vd `10`).
+`Ctrl+Shift+P` → **HSG: Sinh test (gen → .in, brute → .out)** → nhập số test random (vd `10`). Edge case luôn được cộng thêm.
 
 Kết quả trong `tests/`:
 
@@ -234,11 +255,26 @@ Sinh thêm lần nữa → số file **nối tiếp** (đã có 1–10 → tạo
 
 ---
 
-## Bước 6 — Kiểm tra test
+## Bước 6 — Dashboard chấm `main.cpp` (Webview)
+
+1. Viết / sửa **`main.cpp`** (lời giải của bạn).
+2. `Ctrl+Shift+P` → **HSG: Chạy test & Dashboard (so sánh main vs .out)**.
+3. Panel bên cạnh hiện:
+   - Thanh tiến độ: **Đúng X / Y**
+   - Bảng: từng test — **AC** (đúng), **WA** (sai), **TLE**, **RE**
+   - Nút **Xem**: 3 cột **Input | Output bạn | Đáp án chuẩn** + diff từng dòng
+
+Cần file `main.cpp` (hoặc đổi `hsg.solutionFile` trong Settings).
+
+**Timeout:** Mỗi test giới hạn `hsg.runTimeLimitMs` (mặc định 2 giây). Quá thời gian → extension **dừng hẳn** tiến trình con (tránh treo VS Code khi vòng lặp vô hạn).
+
+---
+
+## Bước 7 — Kiểm tra test thủ công
 
 1. Mở `tests/1.in` — input có hợp lý không?
 2. Mở `tests/1.out` — đáp án có đúng không (tự tính tay vài case)?
-3. (Tuỳ chọn) Chạy `main.cpp` với `1.in`, so với `1.out`.
+3. Dùng **Dashboard** hoặc chạy tay `main` với `1.in`.
 
 Brute sai → sửa `brute.cpp` → xóa `tests/` hoặc file `.out` cũ → **Sinh test** lại.
 
@@ -252,9 +288,10 @@ Brute sai → sửa `brute.cpp` → xóa `tests/` hoặc file `.out` cũ → **S
 3. HSG: Khởi tạo
 4. Sửa gen.cpp  (chỉ input, có random nếu cần)
 5. Sửa brute.cpp (đọc stdin, in đáp án đúng)
-6. HSG: Sinh test
-7. Kiểm tra tests/*.in và *.out
-8. Viết / debug main.cpp bằng bộ test đó
+6. HSG: Sinh test (random + edge)
+7. Viết main.cpp
+8. HSG: Chạy test & Dashboard
+9. Sửa code nếu WA/TLE → chạy lại Dashboard
 ```
 
 ---

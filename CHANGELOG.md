@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+- Module `generator.ts`: sinh test random + edge cases từ `hsg-tests.json`
+- Timeout: `tree-kill` dừng tiến trình con khi TLE (gen/brute/main)
+- Webview Dashboard: chấm `main.cpp`, bảng AC/WA/TLE, diff 3 cột
+
 ## 0.4.4
 
 - Bỏ `activationEvents` thừa — VS Code tự kích hoạt từ `contributes.commands`

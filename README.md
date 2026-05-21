@@ -21,7 +21,8 @@ Cần **g++** trên máy (`g++ --version`).
 |------|----------|
 | **HSG: Mở hướng dẫn sinh test** | Đọc hướng dẫn chi tiết |
 | **HSG: Khởi tạo gen.cpp + brute.cpp + tests** | Tạo file mẫu |
-| **HSG: Sinh test (gen → .in, brute → .out)** | Tạo N cặp test |
+| **HSG: Sinh test (gen → .in, brute → .out)** | Random + edge cases (`hsg-tests.json`) |
+| **HSG: Chạy test & Dashboard** | Chấm `main.cpp`, diff với `.out` |
 
 ## Luồng hoạt động
 

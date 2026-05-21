@@ -1,6 +1,7 @@
-import { spawn } from "child_process";
+import { spawn, ChildProcess } from "child_process";
 import * as fs from "fs/promises";
 import * as path from "path";
+import treeKill from "tree-kill";
 import { buildDir, HsgConfig, resolveInWorkspace } from "./config";
 
 export interface RunResult {
@@ -11,6 +12,21 @@ export interface RunResult {
   durationMs: number;
 }
 
+function killProcessTree(pid: number | undefined): void {
+  if (pid === undefined || pid <= 0) {
+    return;
+  }
+  try {
+    treeKill(pid, "SIGTERM");
+  } catch {
+    try {
+      process.kill(pid);
+    } catch {
+      /* already dead */
+    }
+  }
+}
+
 async function runProcess(
   command: string,
   args: string[],
@@ -18,8 +34,17 @@ async function runProcess(
 ): Promise<RunResult> {
   const start = Date.now();
   return new Promise((resolve) => {
-    // shell: false — tránh đường dẫn có dấu/khoảng trắng (vd "Máy tính") bị tách khi gọi g++
-    const child = spawn(command, args, {
+    let child: ChildProcess;
+    let settled = false;
+
+    const finish = (result: RunResult) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(result);
+    };
+
+    child = spawn(command, args, {
       cwd: options.cwd,
       shell: false,
       windowsHide: true,
@@ -31,7 +56,7 @@ async function runProcess(
 
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill();
+      killProcessTree(child.pid);
     }, options.timeoutMs);
 
     child.stdout?.on("data", (d: Buffer) => {
@@ -47,8 +72,7 @@ async function runProcess(
     }
 
     child.on("close", (code) => {
-      clearTimeout(timer);
-      resolve({
+      finish({
         stdout,
         stderr,
         exitCode: code,
@@ -58,8 +82,7 @@ async function runProcess(
     });
 
     child.on("error", (err) => {
-      clearTimeout(timer);
-      resolve({
+      finish({
         stdout,
         stderr: stderr + String(err),
         exitCode: -1,
@@ -158,6 +181,14 @@ export async function runProgram(
   cwd: string
 ): Promise<RunResult> {
   return runProcess(runPath, runArgs, { cwd, stdin: input, timeoutMs });
+}
+
+export function normalizeOutput(s: string): string {
+  return s.replace(/\r\n/g, "\n").trimEnd();
+}
+
+export function outputsEqual(a: string, b: string): boolean {
+  return normalizeOutput(a) === normalizeOutput(b);
 }
 
 export async function writeTestPair(
