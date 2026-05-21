@@ -2,7 +2,7 @@
   "name": "hsg-test-gen",
   "displayName": "HSG Sinh test",
   "description": "Sinh test HSG (gen + brute + edge cases), chấm main.cpp với Webview Dashboard và diff.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "publisher": "Lethaokhoi",
   "author": {
     "name": "Khôi Chu Tuấn"
@@ -131,9 +131,6 @@
         }
       }
     }
-  },
-  "dependencies": {
-    "tree-kill": "^1.2.2"
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

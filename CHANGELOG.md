@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1
+
+- Sửa lỗi `command not found`: extension không activate được (bỏ `tree-kill` ngoài VSIX)
+
 ## 0.5.0
 
 - Module `generator.ts`: sinh test random + edge cases từ `hsg-tests.json`

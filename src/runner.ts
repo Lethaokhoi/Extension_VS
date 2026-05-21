@@ -1,7 +1,6 @@
-import { spawn, ChildProcess } from "child_process";
+import { spawn, ChildProcess, exec } from "child_process";
 import * as fs from "fs/promises";
 import * as path from "path";
-import treeKill from "tree-kill";
 import { buildDir, HsgConfig, resolveInWorkspace } from "./config";
 
 export interface RunResult {
@@ -16,11 +15,15 @@ function killProcessTree(pid: number | undefined): void {
   if (pid === undefined || pid <= 0) {
     return;
   }
+  if (process.platform === "win32") {
+    exec(`taskkill /PID ${pid} /T /F`, { windowsHide: true });
+    return;
+  }
   try {
-    treeKill(pid, "SIGTERM");
+    process.kill(-pid, "SIGTERM");
   } catch {
     try {
-      process.kill(pid);
+      process.kill(pid, "SIGTERM");
     } catch {
       /* already dead */
     }
